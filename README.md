@@ -2,7 +2,7 @@
 
 A single-page tool for ancient numismatists. Enter the counts from a die study (coins, dies observed, singletons, and optionally doubletons and tripletons) to estimate how many dies originally struck an issue, how much of the coinage the sample covers, and how many coins and how much metal that implies.
 
-**Live version:** [sarahprince.net](https://sarahprince.net) <!-- replace with the tool's exact address once it is live -->
+**Live version:** [sarahprince.net/tools/die-study-calculator](https://sarahprince.net/tools/die-study-calculator)
 
 ## What it calculates
 
