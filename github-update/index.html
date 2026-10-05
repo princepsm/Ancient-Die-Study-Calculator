@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ancient Die Study Calculator: Quantitative Estimates of Coin Dies</title>
+<meta name="description" content="Free quantitative numismatics calculator for ancient die studies: estimate original coin dies with the Esty formula, plus Carter, Lyon, coverage and coinage size.">
+<meta name="author" content="Sarah Prince">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://sarahprince.net/tools/die-study-calculator">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f2f4f5' stroke='%23245c52' stroke-width='3'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='Georgia,serif' font-size='15' fill='%23245c52'%3ED%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ancient Die Study Calculator">
+<meta property="og:description" content="Free quantitative numismatics calculator for ancient die studies: estimate original coin dies with the Esty formula, plus Carter, Lyon, coverage and coinage size.">
+<meta property="og:url" content="https://sarahprince.net/tools/die-study-calculator">
+<meta property="og:site_name" content="Sarah Prince">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ancient Die Study Calculator">
+<meta name="twitter:description" content="Free quantitative numismatics calculator for ancient die studies: estimate original coin dies with the Esty formula, plus Carter, Lyon, coverage and coinage size.">
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Ancient Die Study Calculator",
+    "url": "https://sarahprince.net/tools/die-study-calculator",
+    "description": "Free quantitative numismatics calculator for ancient die studies: estimate original coin dies with the Esty formula, plus Carter, Lyon, coverage and coinage size.",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (web browser)",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "inLanguage": "en",
+    "author": {
+      "@type": "Person",
+      "name": "Sarah Prince",
+      "url": "https://sarahprince.net"
+    },
+    "license": "https://opensource.org/licenses/MIT",
+    "codeRepository": "https://github.com/princepsm/Ancient-Die-Study-Calculator",
+    "about": [
+      "Numismatics",
+      "Die study",
+      "Ancient coinage",
+      "Coinage quantification"
+    ],
+    "keywords": "die study, die studies, quantitative numismatics, numismatic calculator, ancient coinage, coinage quantification, original number of dies, obverse dies, Esty formula, Warren Esty, Carter formula, Lyon 1989, Chao1, coverage, mintage estimate, coin production, Greek coins, Roman coins"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do you estimate the original number of dies?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Count the coins in your die study (n) and the different dies they were struck from (d). Esty's formula gives the estimated original number of dies as n·d / (n − d). Results are reliable when there are at least three coins per die, and need care below that."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is coverage in a die study?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Coverage is the share of the original coinage struck by dies already represented in your sample. It is estimated as 1 − d₁/n, where d₁ is the number of dies known from a single coin (singletons)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many coins did an ancient die strike?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No figure is certain. A common working average for large silver coins is 20,000 coins per obverse die, with 10,000 to 40,000 as the plausible range. The calculator lets you change these figures and shows the resulting range of coins struck, metal coined and survival rate."
+        }
+      }
+    ]
+  }
+]
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a die-study workbench. Sample inputs sit in a sticky side column; results read top-down
+   from the headline figure (dies, interval, coverage) to method detail, output and references. */
+:root{
+  --bg:#f2f4f5; --panel:#f2f4f5; --raise:#ffffff; --ink:#1b2430; --muted:#5a6675; --line:#c4ccd4; --line-soft:#d8dee3;
+  --patina:#245c52; --patina-soft:#e3ece9; --gold:#9a7210; --gold-soft:#f1e9d2;
+  --ok:#2d7448; --warn:#9c600a; --bad:#ad372b;
+  --f-display:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12181f; --panel:#12181f; --raise:#1a222b; --ink:#e4e9ee; --muted:#9aa6b3; --line:#33404d; --line-soft:#26303a;
+  --patina:#6dbfa9; --patina-soft:#1d2e2b; --gold:#d6b25e; --gold-soft:#2f2818;
+  --ok:#72c18f; --warn:#e2a64e; --bad:#ee8073; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12181f; --panel:#12181f; --raise:#1a222b; --ink:#e4e9ee; --muted:#9aa6b3; --line:#33404d; --line-soft:#26303a;
+  --patina:#6dbfa9; --patina-soft:#1d2e2b; --gold:#d6b25e; --gold-soft:#2f2818;
+  --ok:#72c18f; --warn:#e2a64e; --bad:#ee8073; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;padding:0 16px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 64px}
+
+/* masthead */
+.mast{display:flex;align-items:center;gap:18px;padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.mark{flex:none;width:58px;height:58px}
+.mast h1{font-family:var(--f-display);font-weight:400;font-size:clamp(1.7rem,3.6vw,2.4rem);letter-spacing:.04em;line-height:1.1;margin:0;text-wrap:balance}
+.mast p{margin:.3rem 0 0;color:var(--muted);max-width:66ch}
+.eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--patina);font-weight:600}
+
+/* two-column workbench */
+.bench{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:40px;align-items:start}
+@media (max-width:920px){.bench{grid-template-columns:minmax(0,1fr);gap:28px}}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (min-width:921px){aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}}
+main{display:flex;flex-direction:column;gap:40px;min-width:0}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+h2{font-family:var(--f-display);font-weight:400;font-size:1.35rem;letter-spacing:.03em;margin:0;text-wrap:balance}
+aside h2{font-size:1.15rem}
+.sec-head{display:flex;flex-direction:column;gap:4px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+
+/* form */
+label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px}
+textarea,input,select{font-family:var(--f-mono);font-size:.9rem;background:var(--raise);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:8px 10px;width:100%;font-variant-numeric:tabular-nums}
+input:hover,select:hover,textarea:hover{border-color:var(--muted)}
+textarea{min-height:130px;resize:vertical}
+.counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.counts input{font-size:1.15rem;padding:10px}
+.counts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.counts.two input{font-size:1rem;padding:8px 10px}
+.checks{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px 8px;min-width:0}
+.checks legend{font-size:.8rem;color:var(--muted);padding:0;margin-bottom:6px}
+.checks label{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:.85rem;color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;background:var(--raise)}
+.checks label:has(input:checked){border-color:var(--patina);background:var(--patina-soft)}
+.checks label.off{opacity:.45;cursor:not-allowed}
+.checks input{width:auto;margin:0;accent-color:var(--patina)}
+.std{margin:4px 0 2px;font-size:.88rem;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:78ch}
+.rec{display:inline-block;margin-left:6px;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ok);border:1px solid currentColor;border-radius:99px;padding:1px 7px;vertical-align:middle;font-weight:600}
+tr.recrow td{background:var(--patina-soft)}
+.modes{margin-left:auto;align-self:center;display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:3px;background:var(--panel);flex:none}
+.modes button{font:inherit;font-size:.85rem;font-weight:600;border:0;background:none;color:var(--muted);padding:6px 16px;border-radius:99px;cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--patina);color:var(--raise)}
+@media (max-width:640px){.mast{flex-wrap:wrap}.modes{margin-left:0}}
+body.simple .full-only{display:none!important}
+body:not(.simple) .simple-only{display:none!important}
+.hl-coins{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:.88rem}
+.hl-coins b{font-family:var(--f-mono);font-weight:500}
+.opt{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+tr.grp td{background:var(--gold-soft)!important;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:600;padding:6px 10px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+aside .row{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.hint{font-size:.83rem;color:var(--muted);margin:0;max-width:72ch}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.88rem;font-weight:600;border-radius:5px;padding:9px 16px;cursor:pointer;border:1px solid var(--patina);background:var(--patina);color:var(--raise);transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--patina)}
+.btn.ghost:hover{background:var(--patina-soft);filter:none}
+.example{font-size:.78rem;color:var(--gold);font-weight:600}
+:is(button,textarea,input,select,summary,tr):focus-visible{outline:2px solid var(--patina);outline-offset:2px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+.tab{font:inherit;font-size:.88rem;background:none;border:0;border-bottom:2px solid transparent;padding:6px 10px;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--patina);font-weight:600}
+.adv{border-top:1px solid var(--line-soft);padding-top:12px}
+.adv summary{cursor:pointer;font-weight:600;color:var(--patina);font-size:.88rem}
+.advbody{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+
+/* headline */
+.headline{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px 24px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px}
+@media (max-width:640px){.headline{grid-template-columns:minmax(0,1fr)}}
+.hl-label{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hl-num{font-family:var(--f-display);font-size:clamp(3rem,8vw,4.4rem);line-height:1;margin:.35rem 0 .2rem;font-variant-numeric:tabular-nums}
+.hl-ci{font-family:var(--f-mono);font-size:.95rem}
+.hl-model{font-size:.83rem;color:var(--muted);margin-top:4px}
+.hl-side{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.meter{height:10px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+.meter>span{display:block;height:100%;background:linear-gradient(90deg,var(--patina),var(--gold));border-radius:99px;transition:width .5s ease}
+.cov-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cov-v{font-family:var(--f-mono);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.badge.ok{color:var(--ok)} .badge.warn{color:var(--warn)} .badge.bad{color:var(--bad)}
+#ratio{margin:0;font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.stat{padding:12px 14px;border-right:1px solid var(--line-soft)}
+.stat:last-child{border-right:0}
+.stat .k{font-size:.76rem;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-size:1.2rem;font-variant-numeric:tabular-nums}
+
+.note{font-size:.88rem;padding:10px 14px;border-radius:5px;background:var(--patina-soft);margin:0}
+.note.warn{border-left:3px solid var(--warn)}
+.note.bad{border-left:3px solid var(--bad)}
+
+/* tables */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom-color:var(--line)}
+td:first-child{font-weight:600}
+td small{color:var(--muted);display:block;font-size:.78rem;font-weight:400}
+td.num{font-family:var(--f-mono);white-space:nowrap}
+td.big{font-family:var(--f-mono);font-size:1.12rem;font-weight:500;white-space:nowrap}
+.brow{cursor:pointer;transition:background .15s}
+.brow:hover td{background:var(--line-soft)}
+.brow.sel td{background:var(--patina-soft)}
+.brow.sel td:first-child{box-shadow:inset 3px 0 0 var(--patina)}
+.fitbar{display:inline-block;vertical-align:middle;width:46px;height:6px;border-radius:3px;background:var(--line-soft);margin-left:8px;overflow:hidden}
+.fitbar>i{display:block;height:100%;background:var(--patina)}
+
+.chartwrap{overflow-x:auto}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.copied{font-size:.83rem;color:var(--ok)}
+
+/* references */
+.refs{font-size:.85rem;color:var(--muted)}
+.refs p{margin:0;max-width:78ch}
+.refs b{color:var(--ink);font-weight:600}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+.about{border-top:2px solid var(--ink);padding-top:18px;gap:10px}
+.about p{margin:0;max-width:72ch}
+.about h3{font-family:var(--f-display);font-size:1.02rem;font-weight:600;margin:10px 0 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Mint Ledger treatment: ruled lines, square corners, ink rules between major parts */
+.mast{border-bottom:2px solid var(--ink)}
+.mark{display:none}
+.mast h1,h2{font-weight:600;letter-spacing:0}
+.mast h1{font-size:clamp(1.6rem,3.4vw,2.1rem)}
+h2{font-size:1.3rem}
+aside{background:transparent;border:0;border-right:1px solid var(--line);border-radius:0;padding:4px 32px 4px 0}
+@media (max-width:920px){aside{border-right:0;border-bottom:1px solid var(--line);padding:0 0 24px}}
+textarea,input,select,.btn,.note,.checks label,.fitbar,.meter,.meter>span{border-radius:0}
+.btn.ghost{border-color:var(--ink);color:var(--ink)}
+.btn.ghost:hover{background:var(--line-soft)}
+.modes{border-radius:0;padding:0;border-color:var(--ink);background:transparent}
+.modes button{border-radius:0;padding:9px 18px;color:var(--ink);font-weight:500}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.headline{background:transparent;border:0;border-bottom:2px solid var(--ink);border-radius:0;padding:0 0 24px}
+.hl-num{font-size:clamp(3.4rem,9vw,6rem)}
+.meter{height:8px}
+.meter>span{background:var(--patina)}
+.badge{border:0;padding:0;border-radius:0}
+.stats{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+.stat{border-right:0;padding:10px 16px 12px 0}
+.sec-head{border-bottom:0;padding-bottom:0}
+th{border-bottom:1px solid var(--ink)}
+td{border-bottom-color:var(--line)}
+.brow.sel td:first-child{box-shadow:none}
+.rec{border:0;padding:0;color:var(--patina)}
+.refs{border-top:2px solid var(--ink);padding-top:18px;color:var(--muted)}
+.counts input{border-width:0 0 1px;border-color:var(--ink);background:transparent;padding:8px 0;font-size:1.3rem}
+.counts.two input{font-size:1.05rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+  <svg class="mark" viewBox="0 0 60 60" aria-hidden="true">
+    <circle cx="30" cy="30" r="27" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 6.6"/>
+    <circle cx="30" cy="30" r="21" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="1.2"/>
+    <text x="30" y="37" text-anchor="middle" font-family="Marcellus, Georgia, serif" font-size="19" fill="var(--gold)" style="font-family:var(--f-display);fill:var(--gold);font-size:19px">D</text>
+  </svg>
+  <div>
+    <div class="eyebrow">Die-study statistics</div>
+    <h1>Ancient Die Study Calculator</h1>
+    <p>A quantitative numismatics tool for ancient die studies. Estimate the original number of dies that struck a coinage with the Esty formula, how much of the coinage your sample covers, and how many coins and how much silver that implies.</p>
+  </div>
+  <div class="modes" role="group" aria-label="Calculator mode">
+    <button type="button" id="mode-simple" aria-pressed="false">Simple</button>
+    <button type="button" id="mode-full" aria-pressed="true">Full</button>
+  </div>
+</header>
+
+<div class="bench">
+<aside aria-labelledby="in-h">
+  <h2 id="in-h">Your sample</h2>
+  <div class="counts">
+    <div><label for="sn">Coins (n)</label><input id="sn" type="number" min="1" inputmode="numeric"></div>
+    <div><label for="sd">Dies (d)</label><input id="sd" type="number" min="1" inputmode="numeric"></div>
+    <div><label for="s1">Singletons (d₁)</label><input id="s1" type="number" min="0" inputmode="numeric"></div>
+  </div>
+  <div class="counts two full-only">
+    <div><label for="s2">Doubletons (d₂) <span class="opt">optional</span></label><input id="s2" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="s3">Tripletons (d₃) <span class="opt">optional</span></label><input id="s3" type="number" min="0" inputmode="numeric"></div>
+  </div>
+  <p class="hint" id="srcnote">Singletons, doubletons and tripletons are dies known from exactly one, two and three coins. Carter and Esty need only coins and dies; the others unlock coverage and Lyon's formulas.</p>
+  <div class="row">
+    <div><label for="side">Die side</label>
+      <select id="side"><option>Obverse</option><option>Reverse</option></select></div>
+    <div><label for="label">Issue name</label><input id="label" type="text"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="go">Estimate</button>
+  </div>
+  <div><label for="exsel">Examples</label>
+    <div class="actions"><select id="exsel" style="flex:1;width:auto;min-width:0">
+      <option value="naxos">Naxos staters (SILVER)</option>
+      <option value="lyon">Lyon 1989 test: true total 100 dies</option>
+    </select><button class="btn ghost" id="ex">Load</button></div></div>
+  <span class="example" id="exflag">Example: Naxos staters, as published in SILVER</span>
+
+  <details class="adv full-only" id="adv">
+    <summary>Count from a die list or frequency table</summary>
+    <div class="advbody">
+      <p class="hint">Fills in the counts above and adds the die-frequency chart.</p>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="t-raw" aria-selected="true" data-mode="raw">Die list</button>
+        <button class="tab" role="tab" id="t-freq" aria-selected="false" data-mode="freq">Frequency table</button>
+      </div>
+      <div id="m-raw">
+        <label for="raw">One die ID per coin, e.g. the obverse-die column of a catalogue</label>
+        <textarea id="raw" spellcheck="false"></textarea>
+        <p class="hint">Separate by new lines, commas or tabs. Blank entries and "?" are ignored.</p>
+      </div>
+      <div id="m-freq" hidden>
+        <label for="freq">Specimens per die : number of dies (one pair per line)</label>
+        <textarea id="freq" spellcheck="false"></textarea>
+        <p class="hint">"1: 3" means three dies are each known from a single coin.</p>
+      </div>
+      <div class="actions"><button class="btn ghost" id="usecount">Count and estimate</button></div>
+    </div>
+  </details>
+</aside>
+
+<main>
+<section aria-labelledby="out-h">
+  <h2 id="out-h" hidden>Summary</h2>
+  <div id="err" class="note bad" hidden></div>
+  <div class="headline">
+    <div>
+      <div class="hl-label" id="hlab">Original obverse dies</div>
+      <div class="hl-num" id="hnum">—</div>
+      <div class="hl-ci" id="hci"></div>
+      <div class="hl-model" id="hmodel"></div>
+      <div class="hl-coins simple-only" id="hcoins"></div>
+    </div>
+    <div class="hl-side">
+      <div>
+        <div class="cov-row"><span class="hl-label">Coverage</span><span class="cov-v" id="hcovv">—</span></div>
+        <div class="meter" role="img" id="hmeter" aria-label="Coverage"><span id="hcov" style="width:0%"></span></div>
+        <p class="hint" style="margin-top:6px">Share of the original coinage struck by dies already in your sample.</p>
+      </div>
+      <p id="ratio"></p>
+    </div>
+  </div>
+  <div class="stats" id="stats"></div>
+</section>
+
+<section class="full-only" aria-labelledby="m-h">
+  <div class="sec-head">
+    <h2 id="m-h">Die estimators</h2>
+    <p class="std"><span class="badge ok">Recommended standard</span> Esty (2011) is the formula most die studies now report, and the one SILVER (KBR) gives for every series alongside Carter (1983). Lead with it for comparability; use the others as cross-checks.</p>
+    <p class="hint" id="cihint">Intervals marked "sim." come from 2,000 simulated resamples under the geometric die-output model. Intervals marked "Lyon" use the published coverage limits (Lyon 1989, formula 5, after Esty 1986).</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Method</th><th>Estimate</th><th>95% interval</th><th>Basis</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="actions"><button class="btn ghost" id="copy">Copy summary</button><span class="copied" id="copied" hidden>Copied</span></div>
+  <textarea id="summary" readonly hidden></textarea>
+</section>
+
+<section class="full-only" aria-labelledby="b-h">
+  <div class="sec-head">
+    <h2 id="b-h">Bayesian estimate</h2>
+    <p class="hint">The probability of every possible die total under five assumptions about how unevenly dies were used, and how well each assumption explains your singletons. Select a row to chart it. A sensitivity check, not a replacement for Esty.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Die-output model</th><th>Most likely</th><th>Median</th><th>95% credible interval</th><th>Fit to your data</th></tr></thead>
+      <tbody id="bbody"></tbody>
+    </table>
+  </div>
+  <div id="bwarn" class="note warn" hidden></div>
+  <div class="chartwrap" id="bchart"></div>
+  <p class="hint">"Fit" compares the models with each other; it is not an absolute test of any one of them.</p>
+  <details class="adv">
+    <summary>Prior limits and Albarède model settings</summary>
+    <div class="advbody">
+      <div class="row">
+        <div><label for="bmin">At least this many dies (optional)</label><input id="bmin" type="number" min="1" inputmode="numeric"></div>
+        <div><label for="bmax">At most (default 50 × dies observed)</label><input id="bmax" type="number" min="1" inputmode="numeric"></div>
+      </div>
+      <p class="hint">Albarède et al. model die output as two populations: dies that fail early (infant mortality) and dies that wear out from metal fatigue. Defaults are the paper's typical case (Fig. 8). Across their 29 issues, the early-failing share averaged 0.63 (sd 0.13), shape β₁ 0.79 (0.16) and β₂ 2.43 (0.46).</p>
+      <div class="row">
+        <div><label for="aom">Share of early-failing dies (ω)</label><input id="aom" type="number" min="0" max="1" step="0.01" value="0.54"></div>
+        <div><label for="ab1">Early-failure shape (β₁)</label><input id="ab1" type="number" min="0.1" step="0.01" value="0.70"></div>
+        <div><label for="ab2">Fatigue shape (β₂)</label><input id="ab2" type="number" min="0.1" step="0.01" value="2.45"></div>
+        <div><label for="ara">Output scale ratio (λ₁/λ₂)</label><input id="ara" type="number" min="0.001" step="0.01" value="0.133"></div>
+      </div>
+      <div class="actions"><button class="btn ghost" id="areset">Reset to paper's typical case</button></div>
+    </div>
+  </details>
+</section>
+
+<section class="full-only" aria-labelledby="q-h">
+  <div class="sec-head">
+    <h2 id="q-h">Coin output</h2>
+    <p class="hint">Dies multiplied by an assumed output per die. SILVER uses 20,000 coins per obverse die as a working average, with 10,000 to 40,000 as the plausible range.</p>
+  </div>
+  <fieldset class="checks" id="qchecks">
+    <legend>Show coin output for</legend>
+    <label><input type="checkbox" value="e" checked> Esty (2011)</label>
+    <label><input type="checkbox" value="c"> Carter (1983)</label>
+    <label><input type="checkbox" value="g"> Coverage-based (Good)</label>
+    <label><input type="checkbox" value="l2"> Lyon–Chao1 (1989) Formula 2</label>
+    <label><input type="checkbox" value="l3"> Lyon (1989) Formula 3</label>
+    <label><input type="checkbox" value="b" checked> Bayesian (selected model)</label>
+  </fieldset>
+  <div class="row">
+    <div><label for="qmid">Coins per die</label><input id="qmid" type="number" min="1" step="1000" value="20000"></div>
+    <div><label for="qlo">Low</label><input id="qlo" type="number" min="1" step="1000" value="10000"></div>
+    <div><label for="qhi">High</label><input id="qhi" type="number" min="1" step="1000" value="40000"></div>
+    <div><label for="qwt">Average weight (g)</label><input id="qwt" type="number" min="0" step="0.01"></div>
+    <div><label for="qmetal">Metal</label>
+      <select id="qmetal"><option value="1">Silver</option><option value="10">Gold or electrum (×10)</option><option value="0">Bronze</option></select></div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead id="qhead"></thead>
+      <tbody id="qbody"></tbody>
+    </table>
+  </div>
+  <p class="hint">Coins struck uses the working figure per die; the range pairs the low end of the die interval with the low output per die, and the high end with the high output, so it is deliberately wide. Albarède et al. (2021) warn that many singletons are early-failing dies that struck few coins, so high singleton counts push these figures up.</p>
+</section>
+
+<section class="full-only" aria-labelledby="ch-h">
+  <div class="sec-head">
+    <h2 id="ch-h">Die frequencies</h2>
+    <p class="hint">How many dies are known from 1, 2, 3… specimens. A tall first bar (many singletons, in gold) means many dies are still unrecorded.</p>
+  </div>
+  <div class="chartwrap" id="chart"></div>
+</section>
+
+<section class="about" aria-labelledby="about-h">
+  <div class="sec-head"><h2 id="about-h">About this calculator</h2></div>
+  <p>The Ancient Die Study Calculator is a free tool for quantitative numismatics. A die study records which dies struck each surviving coin of an issue. From those counts, the calculator estimates the original number of obverse or reverse dies used to strike an ancient coinage, how much of that coinage the known coins cover, and, from an assumed output per die, the size of the coinage in coins and silver.</p>
+  <p>It leads with the Esty formula (Warren W. Esty, 2011), the recommended standard for estimating coin dies and the figure the SILVER database reports, and checks it against Carter (1983), Lyon (1989), Good's coverage estimator and Bayesian models. It suits Greek, Roman and other ancient coinages, and any die study where the coin and die counts are known.</p>
+  <h3>How do you estimate the original number of dies?</h3>
+  <p>Count the coins in your die study (n) and the different dies they were struck from (d). Esty's formula gives the estimated original number of dies as n·d / (n − d). Results are reliable when there are at least three coins per die, and need care below that.</p>
+  <h3>What is coverage in a die study?</h3>
+  <p>Coverage is the share of the original coinage struck by dies already represented in your sample. It is estimated as 1 − d₁/n, where d₁ is the number of dies known from a single coin (singletons).</p>
+  <h3>How many coins did an ancient die strike?</h3>
+  <p>No figure is certain. A common working average for large silver coins is 20,000 coins per obverse die, with 10,000 to 40,000 as the plausible range. The calculator lets you change these figures and shows the resulting range of coins struck, metal coined and survival rate.</p>
+</section>
+
+<section class="refs simple-only" aria-labelledby="sref-h">
+  <div class="sec-head"><h2 id="sref-h">How this is calculated</h2></div>
+  <p><b>Esty (2011), geometric model:</b> D = n·d / (n − d), where n is the number of coins and d the number of dies observed. This is the recommended standard and the figure SILVER (KBR) reports. The interval comes from 2,000 simulated resamples under the same model. Coverage is 1 − d₁/n (Good; Esty 1986). W. W. Esty, "The geometric model for estimating the number of dies", in F. de Callataÿ (ed.), <i>Quantifying Monetary Supplies in Greco-Roman Times</i> (Bari 2011), 43–58.</p>
+  <p>Switch to Full for Carter, Lyon, coverage-based and Bayesian estimates, coin output in metal, and the die-frequency chart.</p>
+</section>
+
+<section class="refs full-only" aria-labelledby="ref-h">
+  <div class="sec-head"><h2 id="ref-h">Formulas and references</h2></div>
+  <p><b>Carter (1983):</b> D = n·d / (a·n − b·d), with (a, b) = (1.214, 1.197) when n/d &lt; 2, (1.124, 1.016) when 2 ≤ n/d &lt; 3, and (1.069, 0.843) when n/d ≥ 3. G. F. Carter, ANS Museum Notes 28 (1983), 195–206.</p>
+  <p><b>Esty (2011), geometric model:</b> D = n·d / (n − d). W. W. Esty, "The geometric model for estimating the number of dies", in F. de Callataÿ (ed.), <i>Quantifying Monetary Supplies in Greco-Roman Times</i> (Bari 2011), 43–58.</p>
+  <p><b>Coverage (Good; Esty 1984, 2006):</b> C = 1 − d₁/n, the share of the original coinage struck by dies already in the sample. The coverage-based die estimate is d / C. W. W. Esty, NC 166 (2006), 359–364.</p>
+  <p><b>Lyon (1989):</b> formula (2) D = d + d₁²/(2d₂), the same estimator ecologists know as Chao1; formula (3) D = d + d₁(d₁ + d₂)/(2d₂ + 3d₃), which Lyon prefers because it ignores dies known from many coins and so resists blocks of die-duplicates from hoards. Coverage limits, formula (5): c ± (2/N)·√(d₁ + 2d₂ − d₁²/N); die limits are D × c / c<sub>max</sub> and D × c / c<sub>min</sub>. Formula (1) is the coverage-based estimate d/(1 − d₁/N) above. S. Lyon, "Die estimation: some experiments with simulated samples of a coinage", <i>British Numismatic Journal</i> 59 (1989), 1–12. The Lyon example reproduces his appendix, Example 1 (sample of 100 coins from a coinage of exactly 100 dies): formula (3) gives 96 dies, with limits 77 to 126.</p>
+  <p><b>Albarède et al. (2021):</b> die output follows F(k) = ωF₁(k) + (1−ω)F₂(k), two Weibull distributions for early-failing and fatigue-failing dies. Typical case: ω = 0.54, β₁ = 0.7, β₂ = 2.45, λ₁ = 80, λ₂ = 600 for a 1,000-coin sample. F. Albarède, F. de Callataÿ, P. Debernardi and J. Blichert-Toft, "Model for ancient Greek and Roman coinage production", <i>Journal of Archaeological Science</i> 131 (2021), 105406. Its use in a Bayesian die estimate here is this tool's own construction, not a method proposed in the paper.</p>
+  <p><b>Bayesian estimates</b> use a uniform prior between the limits you set, and treat each die's coin count as Poisson given its output, so the probabilities of a die being unseen, a singleton or repeated follow directly from each output model.</p>
+  <p>Sample-size guidance follows SILVER (KBR): results are reliable when n/d ≥ 3, need care below 3, are risky below 2, and are best avoided below 1.5. The example reproduces SILVER's published values for Naxos staters (Carter 11.49, Esty 13.82, coverage 84.21%).</p>
+</section>
+</main>
+</div>
+<footer>Prototype. Check figures against the cited publications before relying on them in print.</footer>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const EX={raw:"O1\nO1\nO1\nO1\nO1\nO2\nO2\nO2\nO2\nO3\nO3\nO3\nO4\nO4\nO5\nO5\nO6\nO7\nO8",label:"Naxos, silver staters (540–515 BCE)"};
+
+let mode='raw', listCounts=null;
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  mode=t.dataset.mode;
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  $('m-raw').hidden=mode!=='raw';$('m-freq').hidden=mode!=='freq';
+}));
+
+function parseList(){
+  if(mode==='raw'){
+    const ids=$('raw').value.split(/[\n,;\t]+/).map(s=>s.trim()).filter(s=>s&&s!=='?');
+    if(!ids.length) throw new Error('Paste at least one die ID.');
+    const m=new Map(); ids.forEach(i=>m.set(i,(m.get(i)||0)+1));
+    return [...m.values()];
+  }
+  const counts=[];
+  for(const line of $('freq').value.split('\n')){
+    const t=line.trim(); if(!t) continue;
+    const p=t.split(/[\s:,=]+/).filter(Boolean).map(Number);
+    if(p.length!==2||!Number.isInteger(p[0])||!Number.isInteger(p[1])||p[0]<1||p[1]<0) throw new Error('Could not read the line "'+t+'". Use the form "specimens: dies", e.g. "1: 3".');
+    for(let i=0;i<p[1];i++) counts.push(p[0]);
+  }
+  if(!counts.length) throw new Error('Enter at least one line of the frequency table.');
+  return counts;
+}
+function parseSummary(){
+  const n=+$('sn').value,d=+$('sd').value,d1=+$('s1').value;
+  if(!(n>0&&d>0)||!Number.isInteger(n)||!Number.isInteger(d)||!Number.isInteger(d1)||d1<0) throw new Error('Enter whole numbers for coins, dies and singletons.');
+  if(d>n) throw new Error('Dies observed cannot exceed the number of coins.');
+  if(d1>d) throw new Error('Singletons cannot exceed the number of dies.');
+  if(n-d1<2*(d-d1)) throw new Error('These counts are inconsistent: the non-singleton dies need at least two coins each.');
+  const r2=$('s2').value.trim(),r3=$('s3').value.trim();let d2=null,d3=null;
+  if(r2!==''){d2=+r2;if(!Number.isInteger(d2)||d2<0)throw new Error('Doubletons must be a whole number.');}
+  if(r3!==''){d3=+r3;if(!Number.isInteger(d3)||d3<0)throw new Error('Tripletons must be a whole number.');}
+  if(d1+(d2||0)+(d3||0)>d) throw new Error('Singletons, doubletons and tripletons together cannot exceed the number of dies.');
+  if(d1+2*(d2||0)+3*(d3||0)>n) throw new Error('Singletons, doubletons and tripletons account for more coins than the sample holds.');
+  return {n,d,d1,d2,d3};
+}
+
+function carter(n,d){const r=n/d;const [a,b]=r<2?[1.214,1.197]:r<3?[1.124,1.016]:[1.069,0.843];const den=a*n-b*d;return den>0?n*d/den:Infinity;}
+function esty(n,d){return n>d?n*d/(n-d):Infinity;}
+function cov(n,d1){return 1-d1/n;}
+function covD(n,d,d1){const c=cov(n,d1);return c>0?d/c:Infinity;}
+function lyon2(d,d1,d2){return d2>0?d+d1*d1/(2*d2):Infinity;}
+function lyon3(d,d1,d2,d3){const den=2*d2+3*d3;return den>0?d+d1*(d1+d2)/den:Infinity;}
+function covLim(n,d1,d2){const c=cov(n,d1),h=(2/n)*Math.sqrt(Math.max(0,d1+2*d2-d1*d1/n));return [c-h,c+h];}
+
+function simulate(D,n,reps){
+  D=Math.max(1,Math.round(D));const out={c:[],e:[],g:[],cv:[],l2:[],l3:[]};
+  const cum=new Float64Array(D);
+  for(let r=0;r<reps;r++){
+    let s=0;for(let i=0;i<D;i++){s+=-Math.log(1-Math.random());cum[i]=s;}
+    const hits=new Uint32Array(D);
+    for(let k=0;k<n;k++){const u=Math.random()*s;let lo=0,hi=D-1;while(lo<hi){const m=(lo+hi)>>1;if(cum[m]<u)lo=m+1;else hi=m;}hits[lo]++;}
+    let d=0,d1=0,d2=0,d3=0;for(let i=0;i<D;i++){const h=hits[i];if(h)d++;if(h===1)d1++;else if(h===2)d2++;else if(h===3)d3++;}
+    out.c.push(carter(n,d));out.e.push(esty(n,d));out.g.push(covD(n,d,d1));out.cv.push(cov(n,d1));out.l2.push(lyon2(d,d1,d2));out.l3.push(lyon3(d,d1,d2,d3));
+  }
+  return out;
+}
+function pct(a,p){const f=a.filter(Number.isFinite).sort((x,y)=>x-y);if(f.length<a.length*0.9)return NaN;return f[Math.min(f.length-1,Math.max(0,Math.round(p*(f.length-1))))];}
+const f1=x=>Number.isFinite(x)?x.toFixed(1):'—', f2=x=>Number.isFinite(x)?x.toFixed(2):'—', pc=x=>Number.isFinite(x)?(x*100).toFixed(1)+'%':'—';
+function iv(a){const lo=pct(a,.025),hi=pct(a,.975);return Number.isFinite(lo)&&Number.isFinite(hi)?f1(lo)+' – '+f1(hi):'not reliable';}
+
+function fail(e){$('err').textContent=e.message;$('err').hidden=false;}
+function countFromList(){
+  $('err').hidden=true;
+  let c;try{c=parseList();}catch(e){fail(e);return;}
+  $('sn').value=c.reduce((a,b)=>a+b,0);$('sd').value=c.length;$('s1').value=c.filter(x=>x===1).length;$('s2').value=c.filter(x=>x===2).length;$('s3').value=c.filter(x=>x===3).length;
+  listCounts=c;
+  $('srcnote').textContent='Counted from your '+(mode==='raw'?'die list':'frequency table')+'. Editing these numbers by hand turns off the chart.';
+  run();
+}
+function run(){
+  $('err').hidden=true;
+  let s;try{s=parseSummary();}catch(e){fail(e);return;}
+  const {n,d,d1,d2,d3}=s, counts=listCounts;
+  const r=n/d, C=cov(n,d1), eC=carter(n,d), eE=esty(n,d), eG=covD(n,d,d1);
+  const side=$('side').value.toLowerCase();
+  let cls,txt;
+  if(r>=3){cls='ok';txt='Reliable range';}else if(r>=2){cls='warn';txt='Use with care';}else if(r>=1.5){cls='bad';txt='Risky';}else{cls='bad';txt='Too thin';}
+  $('hlab').textContent='Original '+side+' dies · Esty (2011)';$('hcovv').textContent=pc(C);$('hcov').style.width=Math.max(0,Math.min(100,C*100))+'%';$('hmeter').setAttribute('aria-label','Coverage '+pc(C));
+  $('stats').innerHTML=[['Coins (n)',n],['Dies observed (d)',d],['Singletons (d₁)',d1],['Coins per die (n/d)',f2(r)]]
+    .map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  $('ratio').innerHTML=`<span class="badge ${cls}">${txt}</span> `+(cls==='ok'?'With at least three coins per die, these estimators tend to agree.':
+    r>=2?'Fewer than three coins per die. The estimators can disagree; report them together and lean on coverage.':
+    'Very few coins per die. Treat any die total as a rough lower bound and keep collecting specimens.');
+  const reps=n>3000?600:2000;
+  const sim=Number.isFinite(eE)?simulate(eE,n,reps):null;
+  const rows=[
+    ['Carter (1983)',f1(eC),sim?iv(sim.c):'—','n, d; gamma die-output model'],
+    ['Esty (2011)',f1(eE),sim?iv(sim.e):'—','n, d; geometric die-output model'],
+    ['Coverage-based (Good)',f1(eG),sim?iv(sim.g):'—','d / C, uses singletons'],
+  ];
+  rows[0][2]=sim?iv(sim.c)+' sim.':'—';rows[1][2]=sim?iv(sim.e)+' sim.':'—';rows[2][2]=sim?iv(sim.g)+' sim.':'—';
+  let cvTxt,lyRows=[],eL2=NaN,eL3=NaN,l3iv='',l3lo=NaN,l3hi=NaN;
+  if(d2!==null){
+    const [cmin,cmax]=covLim(n,d1,d2);cvTxt=pc(Math.max(0,cmin))+' – '+pc(Math.min(1,cmax))+' Lyon';
+    eL2=lyon2(d,d1,d2);
+    lyRows.push(['Lyon–Chao1 (1989) Formula 2',f1(eL2),sim?iv(sim.l2)+' sim.':'—','d₁, d₂; dies seen once or twice']);
+    if(d3!==null){eL3=lyon3(d,d1,d2,d3);
+      if(Number.isFinite(eL3)&&cmin>0){l3lo=eL3*C/cmax;l3hi=eL3*C/cmin;}
+      l3iv=Number.isFinite(eL3)&&cmin>0?f1(eL3*C/cmax)+' – '+f1(eL3*C/cmin)+' Lyon':'—';
+      lyRows.push(['Lyon (1989) Formula 3',f1(eL3),l3iv,'d₁, d₂, d₃; resists die-duplicate blocks']);}
+  }else{const cvLo=sim?pct(sim.cv,.025):NaN,cvHi=sim?pct(sim.cv,.975):NaN;cvTxt=Number.isFinite(cvLo)?pc(cvLo)+' – '+pc(cvHi)+' sim.':'—';}
+  const tr=r=>`<tr${r[0]==='Esty (2011)'?' class="recrow"':''}><td>${r[0]}${r[0]==='Esty (2011)'?'<span class="rec">Standard</span>':''}<small>original ${side} dies</small></td><td class="big">${r[1]}</td><td class="num">${r[2]}</td><td>${r[3]}</td></tr>`;
+  $('tbody').innerHTML=rows.map(tr).join('')+
+    (lyRows.length?`<tr class="grp"><td colspan="4">Using doubletons and tripletons</td></tr>`+lyRows.map(tr).join(''):`<tr><td colspan="4"><small>Enter doubletons (and tripletons) to add Lyon's formulas (1989).</small></td></tr>`)+
+    `<tr><td>Coverage (C)<small>share of coinage from recorded dies</small></td><td class="big">${pc(C)}</td><td class="num">${cvTxt}</td><td>1 − d₁/n</td></tr>`;
+  if(!Number.isFinite(eE)) {$('err').textContent='Every coin is from a different die (n = d), so no finite die total can be estimated. Coverage is '+pc(C)+'.';$('err').hidden=false;}
+  const lab=$('label').value.trim()||'Unnamed issue';
+  $('summary').value=`${lab} (${side} dies): n = ${n} coins, d = ${d} dies, d1 = ${d1} singletons, n/d = ${f2(r)}. `+
+    `Estimated original dies: Carter 1983 ${f1(eC)}; Esty 2011 ${f1(eE)}${sim?' (95% sim. interval '+iv(sim.e)+')':''}; coverage-based ${f1(eG)}${Number.isFinite(eL2)?'; Lyon–Chao1 (1989) Formula 2 '+f1(eL2):''}${Number.isFinite(eL3)?'; Lyon (1989) Formula 3 '+f1(eL3)+(l3iv?' ('+l3iv+')':''):''}. Coverage ${pc(C)}.`;
+  last={n,est:{c:eC,e:eE,g:eG,l2:eL2,l3:eL3},sim,l3lim:[l3lo,l3hi]};
+  runBayes(n,d,d1);
+  quant();headline();
+  chart(counts,d2!==null?{d,d1,d2,d3}:null);
+}
+
+
+function lgam(x){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgam(1-x);x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+const MODELS=[{id:'eq',name:'Equal output',sub:'every die struck the same number',k:Infinity},
+  {id:'g2',name:'Moderately uneven',sub:'gamma, shape 2',k:2},
+  {id:'geo',name:'Geometric (Esty 2011)',sub:'gamma, shape 1',k:1},
+  {id:'g05',name:'Very uneven',sub:'gamma, shape 0.5',k:0.5},
+  {id:'alb',name:'Albarède et al. (2021)',sub:'early-failing and fatigue-failing dies, two Weibull populations',k:'alb'}];
+let albTab=null;
+function buildAlb(){
+  const om=Math.min(1,Math.max(0,+$('aom').value)),b1=+$('ab1').value,b2=+$('ab2').value,ra=+$('ara').value;
+  if(!(b1>0&&b2>0&&ra>0)){albTab=null;return;}
+  const M=800,M1=Math.round(om*M),g=[];
+  for(let j=0;j<M1;j++)g.push(ra*Math.pow(-Math.log(1-(j+.5)/M1),1/b1));
+  for(let j=0;j<M-M1;j++)g.push(Math.pow(-Math.log(1-(j+.5)/(M-M1)),1/b2));
+  const Eg=g.reduce((a,b)=>a+b,0)/g.length,lc=[],l0=[],l1=[];
+  for(let t=0;t<=450;t++){const c=Math.pow(10,-4+t*0.02);let p0=0,p1=0;
+    for(const v of g){const x=c*v/Eg,e=Math.exp(-x);p0+=e;p1+=x*e;}
+    lc.push(Math.log(c));l0.push(Math.log(Math.max(p0/g.length,1e-300)));l1.push(Math.log(Math.max(p1/g.length,1e-300)));}
+  albTab={lc,l0,l1};
+}
+function albP(x){const t=albTab,L=Math.log(x),n=t.lc.length;let i=Math.floor((L-t.lc[0])/(t.lc[1]-t.lc[0]));
+  if(i<0)return [1,x];if(i>=n-1)i=n-2;const f=(L-t.lc[i])/(t.lc[i+1]-t.lc[i]);
+  return [Math.exp(t.l0[i]+f*(t.l0[i+1]-t.l0[i])),Math.exp(t.l1[i]+f*(t.l1[i+1]-t.l1[i]))];}
+let bsel='geo', bres=null;
+function bayes(n,d,d1,k,lo,hi){
+  const N=hi-lo+1, lp=new Float64Array(N), d2=d-d1, base=-lgam(d1+1)-lgam(d2+1);let mx=-Infinity;
+  for(let i=0;i<N;i++){const D=lo+i,x=n/D;let p0,p1;
+    if(k==='alb'){[p0,p1]=albP(x);}else if(k===Infinity){p0=Math.exp(-x);p1=x*p0;}else{p0=Math.pow(1+x/k,-k);p1=x*Math.pow(1+x/k,-k-1);}
+    const p2=Math.max(1-p0-p1,1e-300);
+    let v=lgam(D+1)-lgam(D-d+1)+base+(D-d)*Math.log(Math.max(p0,1e-300))+(d1?d1*Math.log(Math.max(p1,1e-300)):0)+(d2?d2*Math.log(p2):0);
+    lp[i]=v;if(v>mx)mx=v;}
+  let sum=0;const w=new Float64Array(N);for(let i=0;i<N;i++){w[i]=Math.exp(lp[i]-mx);sum+=w[i];}
+  let acc=0,q=[NaN,NaN,NaN],targ=[.025,.5,.975],j=0,mode=lo,best=-1,tail=0;
+  for(let i=0;i<N;i++){w[i]/=sum;if(w[i]>best){best=w[i];mode=lo+i;}acc+=w[i];while(j<3&&acc>=targ[j]){q[j]=lo+i;j++;}if(lo+i>lo+0.9*(N-1))tail+=w[i];}
+  return {lo,w,mode,q,logEv:mx+Math.log(sum)-Math.log(N),tail};
+}
+function runBayes(n,d,d1){
+  const mn=Math.max(d,+$('bmin').value||0), mxIn=+$('bmax').value;
+  const hi=Math.min(200000,Math.max(mn+10,mxIn>0?mxIn:Math.max(200,50*d)));
+  if(hi<=mn){$('bbody').innerHTML='';$('bwarn').textContent='The upper limit must be larger than the lower limit and the dies observed.';$('bwarn').hidden=false;bres=null;return;}
+  buildAlb();const act=MODELS.filter(m=>m.k!=='alb'||albTab);
+  const res={};act.forEach(m=>res[m.id]=bayes(n,d,d1,m.k,mn,hi));
+  const mev=Math.max(...act.map(m=>res[m.id].logEv));let z=0;act.forEach(m=>{res[m.id].rel=Math.exp(res[m.id].logEv-mev);z+=res[m.id].rel;});
+  act.forEach(m=>res[m.id].fit=res[m.id].rel/z);if(!res[bsel])bsel='geo';
+  bres={res,hi};drawBayes();
+}
+function drawBayes(){
+  if(!bres){return;}const {res,hi}=bres;
+  $('bbody').innerHTML=MODELS.filter(m=>res[m.id]).map(m=>{const r=res[m.id];return `<tr class="brow${m.id===bsel?' sel':''}" data-id="${m.id}" tabindex="0" aria-selected="${m.id===bsel}"><td>${m.name}<small>${m.sub}</small></td><td class="big">${r.mode}</td><td class="num">${r.q[1]}</td><td class="num">${r.q[0]} – ${r.q[2]}</td><td class="num">${(r.fit*100).toFixed(0)}%<span class="fitbar"><i style="width:${(r.fit*100).toFixed(1)}%"></i></span></td></tr>`;}).join('');
+  document.querySelectorAll('.brow').forEach(tr=>{const pick=()=>{bsel=tr.dataset.id;drawBayes();quant();};tr.addEventListener('click',pick);tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});});
+  const flagged=MODELS.filter(m=>res[m.id]&&res[m.id].tail>0.01).map(m=>m.name);
+  $('bwarn').hidden=!flagged.length;
+  if(flagged.length)$('bwarn').textContent=`For ${flagged.join(', ')}, a noticeable share of the probability sits near the upper limit (${hi.toLocaleString('en-GB')} dies), so the upper end of the interval reflects that limit rather than your data. Collect more coins or set a justified upper limit.`;
+  const r=res[bsel],m=MODELS.find(x=>x.id===bsel);
+  headline();
+  let end=r.lo+r.w.length-1,acc=0;for(let i=0;i<r.w.length;i++){acc+=r.w[i];if(acc>=0.999){end=r.lo+i;break;}}
+  end=Math.max(end,r.q[2]+2);const start=Math.max(r.lo,Math.floor(r.lo));
+  const W=640,H=200,pl=44,pr=12,pt=12,pb=34,pw=W-pl-pr,ph=H-pt-pb;let pk=0;for(let D=start;D<=end;D++)pk=Math.max(pk,r.w[D-r.lo]);
+  const X=D=>pl+pw*(D-start)/Math.max(1,end-start),Y=v=>pt+ph-ph*v/pk;
+  let pts='',band='';for(let D=start;D<=end;D++){pts+=`${X(D).toFixed(1)},${Y(r.w[D-r.lo]).toFixed(1)} `;}
+  for(let D=r.q[0];D<=r.q[2];D++)band+=`${X(D).toFixed(1)},${Y(r.w[D-r.lo]).toFixed(1)} `;
+  band=`${X(r.q[0]).toFixed(1)},${Y(0)} `+band+`${X(r.q[2]).toFixed(1)},${Y(0)}`;
+  const span=end-start,stepT=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000].find(s=>span/s<=8)||100000;let ax='';
+  for(let t=Math.ceil(start/stepT)*stepT;t<=end;t+=stepT)ax+=`<line x1="${X(t)}" x2="${X(t)}" y1="${pt+ph}" y2="${pt+ph+4}" stroke="var(--muted)"/><text x="${X(t)}" y="${pt+ph+16}" text-anchor="middle">${t}</text>`;
+  $('bchart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;min-width:320px" role="img" aria-label="Probability of each original die total">
+    <line x1="${pl}" x2="${W-pr}" y1="${pt+ph}" y2="${pt+ph}" stroke="var(--line)"/>${ax}
+    <polygon points="${band}" fill="var(--patina-soft)"/>
+    <polyline points="${pts}" fill="none" stroke="var(--patina)" stroke-width="2"/>
+    <line x1="${X(r.q[1])}" x2="${X(r.q[1])}" y1="${pt}" y2="${pt+ph}" stroke="var(--gold)" stroke-dasharray="4 3"/>
+    <text x="${X(r.q[1])+4}" y="${pt+10}">median ${r.q[1]}</text>
+    <text x="${pl+pw/2}" y="${H-4}" text-anchor="middle">original ${$('side').value.toLowerCase()} dies · ${m.name}, shaded = 95% credible interval</text></svg>`;
+}
+
+let last=null, simple=false;
+function headline(){
+  const hn=$('hnum'),hc=$('hci'),hm=$('hmodel'),hk=$('hcoins');
+  if(!last){hn.textContent='—';hc.textContent='';hm.textContent='';hk.textContent='';return;}
+  if(last.est){
+    const D=last.est.e,lo=last.sim?pct(last.sim.e,.025):NaN,hi=last.sim?pct(last.sim.e,.975):NaN;
+    hn.textContent=Number.isFinite(D)?Math.round(D):'—';
+    hc.textContent=Number.isFinite(lo)?'95% interval '+Math.round(lo)+'–'+Math.round(hi):'';
+    hm.textContent=Number.isFinite(D)?'Recommended standard. Esty (2011): '+f1(D)+' dies, from n·d / (n − d).':'Every coin is from a different die, so no estimate is possible.';
+    hk.innerHTML=Number.isFinite(D)?`At 20,000 coins per die: about <b>${big(D*20000)}</b> coins struck (range ${Number.isFinite(lo)?big(lo*10000)+' – '+big(hi*40000):'—'} at 10,000–40,000 per die).`:'';
+    return;}
+  const r=bres&&bres.res[bsel];
+  if(!r){hn.textContent='—';hc.textContent='';hm.textContent='';return;}
+  const m=MODELS.find(x=>x.id===bsel);
+  hn.textContent=r.q[1];hc.textContent='95% credible interval '+r.q[0]+'–'+r.q[2];
+  hm.textContent='Bayesian median, '+m.name+' model. Most likely value '+r.mode+'.';
+}
+function setMode(md){simple=md==='simple';document.body.classList.toggle('simple',simple);
+  $('mode-simple').setAttribute('aria-pressed',simple);$('mode-full').setAttribute('aria-pressed',!simple);
+  try{localStorage.setItem('die-est-mode',md);}catch(e){}
+  headline();}
+$('mode-simple').addEventListener('click',()=>setMode('simple'));
+$('mode-full').addEventListener('click',()=>setMode('full'));
+const big=x=>Number.isFinite(x)?Math.round(x).toLocaleString('en-GB'):'—';
+const kg=x=>Number.isFinite(x)?(x>=1000?(x/1000).toLocaleString('en-GB',{maximumFractionDigits:1})+' t':x.toLocaleString('en-GB',{maximumFractionDigits:1})+' kg'):'—';
+const QNAMES={e:'Esty (2011)',c:'Carter (1983)',g:'Coverage-based (Good)',l2:'Lyon–Chao1 (1989) Formula 2',l3:'Lyon (1989) Formula 3',b:'Bayesian'};
+function quant(){
+  const body=$('qbody'),head=$('qhead'); if(!last){body.innerHTML='';head.innerHTML='';return;}
+  const mid=+$('qmid').value, lo=+$('qlo').value, hi=+$('qhi').value, w=+$('qwt').value, m=+$('qmetal').value;
+  document.querySelectorAll('#qchecks input').forEach(cb=>{const k=cb.value,ok=k==='b'?!!(bres&&bres.res[bsel]):Number.isFinite(last.est[k]);
+    cb.disabled=!ok;cb.parentElement.classList.toggle('off',!ok);cb.parentElement.title=ok?'':'Not available for these counts (doubletons or tripletons may be missing).';});
+  const keys=[...document.querySelectorAll('#qchecks input:checked:not(:disabled)')].map(c=>c.value);
+  const rng=(a,b,f)=>Number.isFinite(a)&&Number.isFinite(b)?f(a)+' – '+f(b):'—';
+  const surv=x=>Number.isFinite(x)&&x>0?'1 in '+big(x/last.n):'—';
+  const showMetal=w>0, showSilver=w>0&&m>0;
+  head.innerHTML='<tr><th>Estimate</th><th>Dies</th><th>Coins struck</th><th>Plausible range</th>'+(showMetal?'<th>Metal coined</th>':'')+(showSilver?'<th>Silver equivalent</th>':'')+'<th>Survival rate</th></tr>';
+  if(!keys.length){body.innerHTML='<tr><td colspan="7"><small>Tick at least one estimate above.</small></td></tr>';return;}
+  body.innerHTML=keys.map(k=>{
+    let D,dLo,dHi,sub;
+    if(k==='b'){const r=bres.res[bsel];D=r.q[1];dLo=r.q[0];dHi=r.q[2];sub=MODELS.find(x=>x.id===bsel).name+' model, median';}
+    else if(k==='l3'&&Number.isFinite(last.l3lim[0])){D=last.est.l3;[dLo,dHi]=last.l3lim;sub="Lyon's published limits";}
+    else{D=last.est[k];dLo=last.sim?pct(last.sim[k],.025):NaN;dHi=last.sim?pct(last.sim[k],.975):NaN;sub='simulated interval';}
+    const coins=D*mid,cLo=dLo*lo,cHi=dHi*hi;
+    return `<tr><td>${QNAMES[k]}<small>${sub}</small></td><td class="num">${f1(D)}</td><td class="big">${big(coins)}</td><td class="num">${rng(cLo,cHi,big)}</td>`+
+      (showMetal?`<td class="num">${kg(coins*w/1000)}<small>${rng(cLo*w/1000,cHi*w/1000,kg)}</small></td>`:'')+
+      (showSilver?`<td class="num">${kg(coins*w*m/1000)}<small>${rng(cLo*w*m/1000,cHi*w*m/1000,kg)}</small></td>`:'')+
+      `<td class="num">${surv(coins)}<small>${rng(cLo,cHi,surv)}</small></td></tr>`;}).join('');
+}
+['qmid','qlo','qhi','qwt','qmetal'].forEach(id=>$(id).addEventListener('input',quant));
+document.querySelectorAll('#qchecks input').forEach(cb=>cb.addEventListener('change',quant));
+$('areset').addEventListener('click',()=>{$('aom').value='0.54';$('ab1').value='0.70';$('ab2').value='2.45';$('ara').value='0.133';if(last)run();});
+['bmin','bmax','aom','ab1','ab2','ara'].forEach(id=>$(id).addEventListener('change',()=>{if(last)run();}));
+
+function chart(counts,part){
+  const el=$('chart');let freq,labels,max;
+  if(counts){max=Math.max(...counts);freq=Array.from({length:max},(_,i)=>counts.filter(c=>c===i+1).length);labels=freq.map((_,i)=>String(i+1));}
+  else if(part){const rest=part.d-part.d1-(part.d2||0)-(part.d3||0);freq=[part.d1,part.d2];labels=['1','2'];if(part.d3!==null){freq.push(part.d3);labels.push('3');}
+    freq.push(rest);labels.push(part.d3!==null?'4+':'3+');max=freq.length;}
+  else{el.innerHTML='<p class="hint">The chart needs counts of dies by number of specimens. Enter doubletons (and tripletons), or paste a die list or frequency table under "Count from a die list".</p>';return;}
+  const top=Math.max(1,...freq),bw=Math.max(18,Math.min(44,560/max)),W=Math.max(320,bw*max+60),H=220,pl=40,pb=30,pt=12,ph=H-pb-pt;
+  const step=top<=5?1:Math.ceil(top/5);let g='';
+  for(let v=0;v<=top;v+=step){const y=pt+ph-ph*v/top;g+=`<line x1="${pl}" x2="${W-8}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y+4}" text-anchor="end">${v}</text>`;}
+  freq.forEach((f,i)=>{const h=ph*f/top,x=pl+i*bw+3,y=pt+ph-h;
+    g+=`<rect x="${x}" y="${y}" width="${bw-6}" height="${h}" fill="${i===0?'var(--gold)':'var(--patina)'}" rx="2"><title>${f} dies known from ${labels[i]} specimen${i?'s':''}</title></rect>`;
+    if(max<=25||(i+1)%5===0||i===0)g+=`<text x="${x+(bw-6)/2}" y="${H-12}" text-anchor="middle">${labels[i]}</text>`;});
+  g+=`<text x="${pl+(W-pl)/2}" y="${H}" text-anchor="middle">specimens per die</text>`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H+4}" width="${W}" height="${H+4}" role="img" aria-label="Die frequency chart">${g}</svg>`;
+}
+
+function loadExample(){
+  if($('exsel').value==='lyon'){listCounts=null;$('adv').open=false;
+    $('sn').value=100;$('sd').value=62;$('s1').value=36;$('s2').value=18;$('s3').value=7;$('label').value='Lyon 1989 simulated sample (true total: 100 dies)';$('side').value='Obverse';$('qwt').value='';
+    $('srcnote').textContent='Lyon (1989), appendix Example 1: 100 coins drawn from a simulated coinage of exactly 100 dies. Lyon\'s formula (3) gives 96, limits 77 to 126.';
+    $('exflag').textContent='Example: Lyon 1989 test sample';$('exflag').hidden=false;run();return;}
+  $('exflag').textContent='Example: Naxos staters, as published in SILVER';
+  document.querySelector('[data-mode="raw"]').click();
+  $('raw').value=EX.raw;$('label').value=EX.label;$('side').value='Obverse';$('qwt').value='12.3';$('qmetal').value='1';countFromList();$('exflag').hidden=false;
+  $('srcnote').textContent='Example counts (n = 19, d = 8, d₁ = 3). The matching die list is under Advanced input.';
+}
+$('go').addEventListener('click',()=>{$('exflag').hidden=true;run();});
+$('usecount').addEventListener('click',()=>{$('exflag').hidden=true;countFromList();});
+['sn','sd','s1','s2','s3'].forEach(id=>$(id).addEventListener('input',()=>{if(listCounts){listCounts=null;$('srcnote').textContent='Using the counts as entered.';}}));
+$('ex').addEventListener('click',loadExample);
+$('copy').addEventListener('click',()=>{
+  const t=$('summary').value;const done=()=>{$('copied').hidden=false;setTimeout(()=>$('copied').hidden=true,1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>{$('summary').hidden=false;$('summary').select();});}
+  else{$('summary').hidden=false;$('summary').select();}
+});
+try{if(localStorage.getItem('die-est-mode')==='simple')setMode('simple');}catch(e){}
+loadExample();
+})();
+</script>
+
+</body>
+</html>
